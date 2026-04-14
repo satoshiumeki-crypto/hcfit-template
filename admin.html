@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テンプレート管理画面</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #333; }
+    .admin-header {
+      background: #1a1a2e; color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .admin-header h1 { font-size: 18px; font-weight: 700; }
+    .admin-header-actions { display: flex; gap: 8px; }
+    .admin-btn {
+      padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .admin-btn-primary { background: #4f46e5; color: #fff; }
+    .admin-btn-primary:hover { background: #4338ca; }
+    .admin-btn-danger { background: #ef4444; color: #fff; }
+    .admin-btn-danger:hover { background: #dc2626; }
+    .admin-btn-success { background: #22c55e; color: #fff; }
+    .admin-btn-success:hover { background: #16a34a; }
+    .admin-btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+    .admin-btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    .admin-layout { display: flex; min-height: calc(100vh - 56px); }
+    .admin-sidebar {
+      width: 220px; background: #fff; border-right: 1px solid #e5e7eb;
+      padding: 16px 0; flex-shrink: 0;
+    }
+    .admin-sidebar a {
+      display: block; padding: 12px 24px; font-size: 14px; color: #555;
+      text-decoration: none; transition: all 0.2s; border-left: 3px solid transparent;
+    }
+    .admin-sidebar a:hover { background: #f8f9fa; color: #333; }
+    .admin-sidebar a.active { background: #eff6ff; color: #4f46e5; border-left-color: #4f46e5; font-weight: 600; }
+    .admin-main { flex: 1; padding: 24px; max-width: 900px; }
+
+    .panel { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .panel-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #1a1a2e; }
+    .panel-subtitle { font-size: 14px; font-weight: 600; color: #555; margin: 20px 0 12px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; }
+    .field input[type="text"], .field input[type="url"], .field textarea {
+      width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 14px; font-family: inherit; transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field-hint { font-size: 11px; color: #999; margin-top: 2px; }
+
+    .field-row { display: flex; gap: 16px; }
+    .field-row .field { flex: 1; }
+
+    .color-field { display: flex; align-items: center; gap: 12px; }
+    .color-field input[type="color"] {
+      width: 48px; height: 36px; border: 1px solid #d1d5db; border-radius: 6px;
+      cursor: pointer; padding: 2px;
+    }
+    .color-field .color-hex {
+      width: 100px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+      font-size: 13px; font-family: monospace;
+    }
+
+    .logo-upload-area {
+      border: 2px dashed #d1d5db; border-radius: 8px; padding: 24px;
+      text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .logo-upload-area:hover { border-color: #4f46e5; background: #fafafe; }
+    .logo-upload-area img { max-height: 60px; margin-bottom: 8px; }
+    .logo-upload-area p { font-size: 13px; color: #888; }
+    .logo-upload-area input[type="file"] { display: none; }
+
+    .item-card {
+      border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px;
+      background: #fafafa;
+    }
+    .item-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .item-card-title { font-size: 14px; font-weight: 600; color: #333; }
+    .item-card-remove { font-size: 12px; color: #ef4444; cursor: pointer; border: none; background: none; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .preview-frame { width: 100%; height: 600px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; padding: 12px 24px;
+      background: #1a1a2e; color: #fff; border-radius: 8px; font-size: 14px;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200;
+    }
+    .toast.show { opacity: 1; }
+
+    .save-bar {
+      position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e5e7eb;
+      padding: 16px 28px; margin: 0 -28px -28px; border-radius: 0 0 12px 12px;
+      display: flex; justify-content: flex-end; gap: 12px; align-items: center;
+    }
+    .save-bar .unsaved-badge {
+      font-size: 12px; color: #f59e0b; font-weight: 600; margin-right: auto;
+      display: none;
+    }
+    .save-bar .unsaved-badge.show { display: block; }
+    .admin-btn-save {
+      padding: 10px 32px; border-radius: 8px; font-size: 14px; font-weight: 700;
+      border: none; cursor: pointer; background: #4f46e5; color: #fff; transition: all 0.2s;
+    }
+    .admin-btn-save:hover { background: #4338ca; }
+    .admin-btn-save:active { transform: scale(0.97); }
+
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { width: 100%; display: flex; overflow-x: auto; padding: 0; border-right: none; border-bottom: 1px solid #e5e7eb; }
+      .admin-sidebar a { white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; padding: 12px 16px; }
+      .admin-sidebar a.active { border-bottom-color: #4f46e5; border-left: none; }
+      .field-row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>テンプレート管理画面</h1>
+    <div class="admin-header-actions">
+      <button class="admin-btn admin-btn-outline" onclick="openPreview()">プレビュー</button>
+      <button class="admin-btn admin-btn-danger" onclick="resetConfig()">リセット</button>
+      <button class="admin-btn admin-btn-success" onclick="downloadConfig()">config.js をダウンロード</button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <nav class="admin-sidebar">
+      <a href="#" class="active" data-tab="tab-basic">基本設定</a>
+      <a href="#" data-tab="tab-design">デザイン</a>
+      <a href="#" data-tab="tab-content">コンテンツ</a>
+      <a href="#" data-tab="tab-seo">SEO設定</a>
+      <a href="#" data-tab="tab-preview">プレビュー</a>
+    </nav>
+
+    <main class="admin-main">
+      <!-- 基本設定 -->
+      <div class="tab-content active" id="tab-basic">
+        <div class="panel">
+          <h2 class="panel-title">会社情報</h2>
+          <div class="field">
+            <label>会社名（日本語）</label>
+            <input type="text" data-path="company.name" placeholder="株式会社サンプル">
+          </div>
+          <div class="field">
+            <label>会社名（英語）</label>
+            <input type="text" data-path="company.nameEn" placeholder="SAMPLE COMPANY">
+          </div>
+          <div class="field">
+            <label>住所</label>
+            <input type="text" data-path="company.address" placeholder="〒000-0000 東京都...">
+          </div>
+          <div class="field">
+            <label>コピーライト</label>
+            <input type="text" data-path="company.copyright" placeholder="© 2024 Sample Company">
+          </div>
+
+          <h3 class="panel-subtitle">電話番号1</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>ラベル</label>
+              <input type="text" data-path="company.phone1.label" placeholder="お問い合わせはこちら">
+            </div>
+            <div class="field">
+              <label>電話番号</label>
+              <input type="text" data-path="company.phone1.number" placeholder="03-0000-0000">
+            </div>
+          </div>
+          <div class="field">
+            <label>受付時間</label>
+            <input type="text" data-path="company.phone1.hours" placeholder="平日 9:00〜18:00">
+          </div>
+
+          <h3 class="panel-subtitle">電話番号2</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>ラベル</label>
+              <input type="text" data-path="company.phone2.label" placeholder="サポートはこちら">
+            </div>
+            <div class="field">
+              <label>電話番号</label>
+              <input type="text" data-path="company.phone2.number" placeholder="03-0000-0001">
+            </div>
+          </div>
+          <div class="field">
+            <label>受付時間</label>
+            <input type="text" data-path="company.phone2.hours" placeholder="平日 9:00〜18:00">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">ナビゲーション</h2>
+          <div id="nav-items"></div>
+        </div>
+        <div class="panel">
+          <div class="save-bar">
+            <span class="unsaved-badge" id="unsaved-basic">未保存の変更があります</span>
+            <button class="admin-btn-save" onclick="saveCurrentTab('basic')">基本設定を保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- デザイン -->
+      <div class="tab-content" id="tab-design">
+        <div class="panel">
+          <h2 class="panel-title">テーマカラー</h2>
+          <div class="field">
+            <label>メインカラー（アクセントカラー）</label>
+            <div class="color-field">
+              <input type="color" data-path="theme.primaryColor" value="#f8a035">
+              <input type="text" class="color-hex" data-path="theme.primaryColor" placeholder="#f8a035">
+            </div>
+          </div>
+          <div class="field">
+            <label>ダークカラー（ボタン・ヘッダー）</label>
+            <div class="color-field">
+              <input type="color" data-path="theme.darkColor" value="#444444">
+              <input type="text" class="color-hex" data-path="theme.darkColor" placeholder="#444444">
+            </div>
+          </div>
+          <div class="field">
+            <label>フッター背景色</label>
+            <div class="color-field">
+              <input type="color" data-path="theme.bgFooterColor" value="#2a2a2a">
+              <input type="text" class="color-hex" data-path="theme.bgFooterColor" placeholder="#2a2a2a">
+            </div>
+          </div>
+          <div class="field">
+            <label>お問い合わせ背景色</label>
+            <div class="color-field">
+              <input type="color" data-path="theme.bgContactColor" value="#3a3a3a">
+              <input type="text" class="color-hex" data-path="theme.bgContactColor" placeholder="#3a3a3a">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">ロゴ</h2>
+          <div class="field">
+            <label>ロゴテキスト（画像がない場合に表示）</label>
+            <input type="text" data-path="theme.logoText" placeholder="SAMPLE COMPANY">
+          </div>
+          <div class="field">
+            <label>ロゴ画像</label>
+            <div class="logo-upload-area" id="logo-upload">
+              <img id="logo-preview" src="" style="display:none;">
+              <p id="logo-upload-text">クリックして画像を選択<br>またはドラッグ＆ドロップ</p>
+              <input type="file" id="logo-file" accept="image/*">
+            </div>
+            <p class="field-hint">推奨: 高さ40px以上のPNG/SVG</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="save-bar">
+            <span class="unsaved-badge" id="unsaved-design">未保存の変更があります</span>
+            <button class="admin-btn-save" onclick="saveCurrentTab('design')">デザインを保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- コンテンツ -->
+      <div class="tab-content" id="tab-content">
+        <div class="panel">
+          <h2 class="panel-title">ヒーローセクション</h2>
+          <div class="field">
+            <label>メインタイトル</label>
+            <textarea data-path="hero.title" rows="2" placeholder="先生、&#10;代わりにやります！"></textarea>
+            <p class="field-hint">改行は \n で表現されます</p>
+          </div>
+          <div class="field">
+            <label>説明文</label>
+            <textarea data-path="hero.description" rows="3"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>CTA1 ラベル</label>
+              <input type="text" data-path="hero.cta1.label" placeholder="資料請求">
+            </div>
+            <div class="field">
+              <label>CTA2 ラベル</label>
+              <input type="text" data-path="hero.cta2.label" placeholder="お問い合わせ">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">コンセプト</h2>
+          <div class="field">
+            <label>サブタイトル</label>
+            <input type="text" data-path="concept.subtitle">
+          </div>
+          <div class="field">
+            <label>見出し</label>
+            <input type="text" data-path="concept.heading">
+          </div>
+          <div class="field">
+            <label>説明文1</label>
+            <textarea data-path="concept.descriptions.0" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label>説明文2</label>
+            <textarea data-path="concept.descriptions.1" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">サービス</h2>
+          <div class="field">
+            <label>リード文</label>
+            <textarea data-path="service.lead" rows="2"></textarea>
+          </div>
+          <div class="field">
+            <label>メインタイトル</label>
+            <input type="text" data-path="service.mainTitle">
+          </div>
+          <div id="service-items"></div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">選ばれる理由</h2>
+          <div id="reason-items"></div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">事例紹介</h2>
+          <div class="field">
+            <label>リード文</label>
+            <textarea data-path="cases.lead" rows="2"></textarea>
+          </div>
+          <div id="cases-items"></div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">FAQ</h2>
+          <div id="faq-items"></div>
+          <button class="admin-btn admin-btn-primary" onclick="addFaqItem()" style="margin-top:8px;">+ FAQ追加</button>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">お問い合わせ</h2>
+          <div class="field">
+            <label>リード文</label>
+            <textarea data-path="contact.lead" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">地図（Googleマップ）</h2>
+          <div class="field">
+            <label>Googleマップ埋め込みURL</label>
+            <input type="url" data-path="map.embedUrl" placeholder="https://www.google.com/maps/embed?pb=...">
+            <p class="field-hint">Googleマップ → 共有 → 「地図を埋め込む」→ iframeのsrc="..."のURLをコピー</p>
+          </div>
+          <div class="field">
+            <label>診療時間</label>
+            <textarea data-path="map.hours" rows="2" placeholder="平日 9:00〜20:00&#10;日曜・祝日 休診"></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="save-bar">
+            <span class="unsaved-badge" id="unsaved-content">未保存の変更があります</span>
+            <button class="admin-btn-save" onclick="saveCurrentTab('content')">コンテンツを保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO設定 -->
+      <div class="tab-content" id="tab-seo">
+        <div class="panel">
+          <h2 class="panel-title">SEO基本設定</h2>
+          <div class="field">
+            <label>ページタイトル</label>
+            <input type="text" data-path="seo.title" placeholder="株式会社サンプル | サービス名">
+            <p class="field-hint">検索結果に表示されるタイトル（30〜60文字推奨）</p>
+          </div>
+          <div class="field">
+            <label>メタディスクリプション</label>
+            <textarea data-path="seo.description" rows="3" placeholder="サイトの説明文..."></textarea>
+            <p class="field-hint">検索結果に表示される説明文（120〜160文字推奨）</p>
+          </div>
+          <div class="field">
+            <label>メタキーワード</label>
+            <input type="text" data-path="seo.keywords" placeholder="キーワード1, キーワード2, キーワード3">
+          </div>
+          <div class="field">
+            <label>Canonical URL</label>
+            <input type="url" data-path="seo.canonicalUrl" placeholder="https://example.com">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">OGP / SNS設定</h2>
+          <div class="field">
+            <label>OGP画像（SNSシェア時に表示される画像）</label>
+            <div class="logo-upload-area" id="ogp-upload" style="min-height:120px;">
+              <img id="ogp-preview" src="" style="display:none;max-height:160px;max-width:100%;border-radius:4px;">
+              <p id="ogp-upload-text">クリックまたはドラッグ＆ドロップで画像を設定<br><span style="font-size:11px;color:#aaa;">推奨サイズ: 1200 x 630 px</span></p>
+              <input type="file" id="ogp-file" accept="image/*">
+            </div>
+            <p class="field-hint">Canva等で作成した画像をそのままドロップできます</p>
+          </div>
+          <div class="field">
+            <label>または画像URLを直接入力</label>
+            <input type="url" data-path="seo.ogImage" placeholder="https://example.com/og-image.jpg">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">LLMO対策</h2>
+          <p style="font-size:14px;color:#666;line-height:1.8;">
+            以下のファイルが自動生成されます：<br>
+            <strong>robots.txt</strong> — AIクローラーへのアクセス許可設定<br>
+            <strong>llms.txt</strong> — LLM向けサイト概要ファイル<br>
+            <strong>JSON-LD構造化データ</strong> — Organization, FAQ, Service, BreadcrumbList<br>
+            <br>
+            これらはconfig.jsの内容から自動的に反映されます。
+          </p>
+        </div>
+        <div class="panel">
+          <div class="save-bar">
+            <span class="unsaved-badge" id="unsaved-seo">未保存の変更があります</span>
+            <button class="admin-btn-save" onclick="saveCurrentTab('seo')">SEO設定を保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- プレビュー -->
+      <div class="tab-content" id="tab-preview">
+        <div class="panel">
+          <h2 class="panel-title">リアルタイムプレビュー</h2>
+          <iframe id="preview-frame" class="preview-frame" src="index.html"></iframe>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

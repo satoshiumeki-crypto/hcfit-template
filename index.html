@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- SEO: Basic Meta (updated by config.js) -->
+  <title id="seo-title">サイトタイトル</title>
+  <meta name="description" id="seo-description" content="">
+  <meta name="keywords" id="seo-keywords" content="">
+  <link rel="canonical" id="seo-canonical" href="">
+  <!-- SEO: OGP -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="og-title" content="">
+  <meta property="og:description" id="og-description" content="">
+  <meta property="og:image" id="og-image" content="">
+  <meta property="og:url" id="og-url" content="">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" id="og-sitename" content="">
+  <!-- SEO: Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="tw-title" content="">
+  <meta name="twitter:description" id="tw-description" content="">
+  <meta name="twitter:image" id="tw-image" content="">
+  <!-- AEO/LLMO: Structured Data (injected by script.js) -->
+  <script type="application/ld+json" id="ld-organization"></script>
+  <script type="application/ld+json" id="ld-breadcrumb"></script>
+  <script type="application/ld+json" id="ld-faq"></script>
+  <script type="application/ld+json" id="ld-service"></script>
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Config -->
+  <script src="config.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header" id="header" role="banner">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="トップページへ">
+        <img class="logo-img" id="header-logo-img" src="" alt="" style="display:none;">
+        <span class="logo-text" id="header-logo-text"></span>
+      </a>
+      <nav class="nav" id="main-nav" role="navigation" aria-label="メインナビゲーション"></nav>
+      <div class="header-right">
+        <div class="header-phone">
+          <div class="header-phone-number-row">
+            <span class="phone-icon">&#128222;</span>
+            <span class="phone-number" id="header-phone"></span>
+          </div>
+          <span class="phone-hours" id="header-hours"></span>
+        </div>
+        <a href="#" class="header-btn header-btn-doc" id="header-cta1">
+          <span class="btn-icon">&#128196;</span>
+          <span id="header-cta1-label">資料請求</span>
+        </a>
+        <a href="#contact" class="header-btn header-btn-contact" id="header-cta2">
+          <span class="btn-icon">&#9993;</span>
+          <span id="header-cta2-label">お問い合わせ</span>
+        </a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="メニューを開く">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="hero" aria-label="メインビジュアル" data-llm-context="サイトのメインメッセージとCTAボタン">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title fade-in" id="hero-title"></h1>
+      <p class="hero-desc fade-in delay-1" id="hero-desc"></p>
+      <div class="hero-btns fade-in delay-2">
+        <a href="#" class="btn btn-dark" id="hero-cta1"><span class="btn-icon"></span> <span></span> <span class="btn-arrow">&rsaquo;</span></a>
+        <a href="#contact" class="btn btn-orange" id="hero-cta2"><span class="btn-icon"></span> <span></span> <span class="btn-arrow">&rsaquo;</span></a>
+      </div>
+    </div>
+    <div class="hero-image" id="hero-image-area">
+      <div class="hero-img-placeholder" id="hero-placeholder">
+        <div class="person person-1"></div>
+        <div class="person person-2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Concept -->
+  <section class="section concept" id="concept" aria-label="コンセプト" data-llm-context="企業理念と提供価値">
+    <div class="section-header fade-up">
+      <span class="section-label">CONCEPT</span>
+      <h2 class="section-title">コンセプト</h2>
+    </div>
+    <div class="concept-content">
+      <div class="concept-image fade-up">
+        <div class="img-placeholder tall" id="concept-img-wrap">
+          <div class="placeholder-text">Business Image</div>
+        </div>
+      </div>
+      <div class="concept-text fade-up delay-1">
+        <p class="concept-subtitle" id="concept-subtitle"></p>
+        <h3 class="concept-heading" id="concept-heading"></h3>
+        <div id="concept-descriptions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service -->
+  <section class="section service" id="service" aria-label="サービス紹介" data-llm-context="提供しているサービスの詳細">
+    <div class="section-header fade-up">
+      <span class="section-label">SERVICE</span>
+      <h2 class="section-title">サービス</h2>
+    </div>
+    <p class="service-lead fade-up" id="service-lead"></p>
+    <h3 class="service-main-title fade-up" id="service-main-title"></h3>
+    <div class="service-cards" id="service-cards"></div>
+  </section>
+
+  <!-- Reason -->
+  <section class="section reason" id="reason" aria-label="選ばれる理由" data-llm-context="競合優位性と選ばれる理由">
+    <div class="section-header fade-up">
+      <span class="section-label">REASON</span>
+      <h2 class="section-title">選ばれる理由</h2>
+    </div>
+    <div class="reason-cards" id="reason-cards"></div>
+    <div class="reason-btn-wrap fade-up">
+      <a href="#" class="btn btn-outline">詳しく見る &rsaquo;</a>
+    </div>
+  </section>
+
+  <!-- Cases -->
+  <section class="section cases" id="cases" aria-label="事例紹介" data-llm-context="導入事例と顧客の声">
+    <div class="section-header fade-up">
+      <span class="section-label">CASES</span>
+      <h2 class="section-title">事例紹介</h2>
+    </div>
+    <p class="cases-lead fade-up" id="cases-lead"></p>
+    <div class="cases-cards" id="cases-cards"></div>
+    <div class="cases-btn-wrap fade-up">
+      <a href="#" class="btn btn-outline">事例の一覧を見る &rsaquo;</a>
+    </div>
+  </section>
+
+  <!-- FAQ (AIO/AEO対策) -->
+  <section class="faq" id="faq" aria-label="よくある質問" data-llm-context="よくある質問と回答">
+    <div class="section-header fade-up">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title">よくある質問</h2>
+    </div>
+    <div class="faq-list" id="faq-list"></div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section contact" id="contact" aria-label="お問い合わせ" data-llm-context="お問い合わせ先と連絡方法">
+    <div class="contact-bg">
+      <div class="section-header fade-up">
+        <span class="section-label white">CONTACT</span>
+        <h2 class="section-title white">お問い合わせ</h2>
+      </div>
+      <p class="contact-lead fade-up" id="contact-lead"></p>
+      <div class="contact-btns fade-up">
+        <a href="#" class="btn btn-dark btn-lg" id="contact-cta1"><span class="btn-icon">&#128196;</span> <span></span> <span class="btn-arrow">&rsaquo;</span></a>
+        <a href="#" class="btn btn-orange btn-lg" id="contact-cta2"><span class="btn-icon">&#9993;</span> <span></span> <span class="btn-arrow">&rsaquo;</span></a>
+      </div>
+      <div class="contact-phones fade-up" id="contact-phones"></div>
+    </div>
+  </section>
+
+  <!-- Map -->
+  <section class="map-section" id="map" aria-label="アクセスマップ">
+    <div class="map-inner fade-up">
+      <div class="map-info">
+        <h2 class="map-title">アクセス</h2>
+        <p class="map-name" id="map-name"></p>
+        <p class="map-address" id="map-address"></p>
+        <p class="map-phone" id="map-phone"></p>
+        <p class="map-hours" id="map-hours"></p>
+      </div>
+      <div class="map-embed" id="map-embed"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-logo">
+          <img class="footer-logo-img" id="footer-logo-img" src="" alt="" style="display:none;">
+          <span class="footer-logo-text" id="footer-logo-text"></span>
+        </div>
+        <p class="footer-company" id="footer-company"></p>
+        <p class="footer-address" id="footer-address"></p>
+      </div>
+      <div class="footer-right">
+        <nav class="footer-nav" id="footer-nav" aria-label="フッターナビゲーション"></nav>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p id="footer-copyright"></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
