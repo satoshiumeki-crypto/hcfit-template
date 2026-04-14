@@ -130,6 +130,7 @@
       <button class="admin-btn admin-btn-outline" onclick="openPreview()">プレビュー</button>
       <button class="admin-btn admin-btn-danger" onclick="resetConfig()">リセット</button>
       <button class="admin-btn admin-btn-success" onclick="downloadConfig()">config.js をダウンロード</button>
+      <button class="admin-btn admin-btn-primary" onclick="publishToGitHub()" id="publish-btn">🚀 サイトに公開</button>
     </div>
   </div>
 
@@ -140,6 +141,7 @@
       <a href="#" data-tab="tab-content">コンテンツ</a>
       <a href="#" data-tab="tab-seo">SEO設定</a>
       <a href="#" data-tab="tab-preview">プレビュー</a>
+      <a href="#" data-tab="tab-github">GitHub連携</a>
     </nav>
 
     <main class="admin-main">
@@ -439,6 +441,49 @@
         <div class="panel">
           <h2 class="panel-title">リアルタイムプレビュー</h2>
           <iframe id="preview-frame" class="preview-frame" src="index.html"></iframe>
+        </div>
+      </div>
+
+      <!-- GitHub連携 -->
+      <div class="tab-content" id="tab-github">
+        <div class="panel">
+          <h2 class="panel-title">GitHub連携設定</h2>
+          <p style="font-size:14px;color:#666;margin-bottom:20px;line-height:1.8;">
+            GitHubと連携すると、管理画面から直接サイトを公開できます。<br>
+            設定は初回のみ。一度設定すれば「🚀 サイトに公開」ボタンでワンクリック公開。
+          </p>
+          <div class="field">
+            <label>GitHub Personal Access Token</label>
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx">
+            <p class="field-hint">GitHub → Settings → Developer settings → Personal access tokens → 「repo」権限で作成</p>
+          </div>
+          <div class="field">
+            <label>リポジトリオーナー</label>
+            <input type="text" id="github-owner" placeholder="satoshiumeki-crypto">
+          </div>
+          <div class="field">
+            <label>リポジトリ名</label>
+            <input type="text" id="github-repo" placeholder="hcfit-template">
+          </div>
+          <div style="margin-top:16px;">
+            <button class="admin-btn admin-btn-primary" onclick="saveGitHubSettings()">GitHub設定を保存</button>
+            <button class="admin-btn admin-btn-outline" onclick="testGitHubConnection()" style="color:#333;border-color:#d1d5db;margin-left:8px;">接続テスト</button>
+          </div>
+          <div id="github-status" style="margin-top:16px;font-size:14px;"></div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">使い方</h2>
+          <div style="font-size:14px;color:#555;line-height:2;">
+            <p><strong>初回セットアップ</strong></p>
+            <p>1. 上のGitHub設定を入力して「GitHub設定を保存」</p>
+            <p>2. 「接続テスト」で接続確認</p>
+            <br>
+            <p><strong>サイト更新時</strong></p>
+            <p>1. 各タブで内容を編集して保存</p>
+            <p>2. 右上の「🚀 サイトに公開」をクリック</p>
+            <p>3. 1〜2分でNetlifyが自動デプロイ → サイト更新完了！</p>
+          </div>
         </div>
       </div>
     </main>

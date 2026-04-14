@@ -485,3 +485,123 @@ function deepMerge(defaults, saved) {
   }
   return result;
 }
+
+// ===== GitHub連携 =====
+
+function saveGitHubSettings() {
+  const token = document.getElementById('github-token').value.trim();
+  const owner = document.getElementById('github-owner').value.trim();
+  const repo = document.getElementById('github-repo').value.trim();
+  if (!token || !owner || !repo) {
+    showToast('すべての項目を入力してください');
+    return;
+  }
+  localStorage.setItem('github_settings', JSON.stringify({ token, owner, repo }));
+  showToast('✅ GitHub設定を保存しました');
+}
+
+function loadGitHubSettings() {
+  const saved = localStorage.getItem('github_settings');
+  if (!saved) return null;
+  const s = JSON.parse(saved);
+  // フォームにも反映
+  const tokenEl = document.getElementById('github-token');
+  const ownerEl = document.getElementById('github-owner');
+  const repoEl = document.getElementById('github-repo');
+  if (tokenEl && s.token) tokenEl.value = s.token;
+  if (ownerEl && s.owner) ownerEl.value = s.owner;
+  if (repoEl && s.repo) repoEl.value = s.repo;
+  return s;
+}
+
+async function testGitHubConnection() {
+  const s = loadGitHubSettings();
+  if (!s) { showStatus('❌ GitHub設定を先に保存してください', 'red'); return; }
+  showStatus('接続テスト中...', '#666');
+  try {
+    const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}`, {
+      headers: { 'Authorization': `token ${s.token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      showStatus(`✅ 接続成功！リポジトリ: ${data.full_name}`, 'green');
+    } else {
+      showStatus(`❌ 接続失敗（${res.status}）。トークンとリポジトリ名を確認してください`, 'red');
+    }
+  } catch (e) {
+    showStatus('❌ 接続エラー: ' + e.message, 'red');
+  }
+}
+
+async function publishToGitHub() {
+  const s = loadGitHubSettings();
+  if (!s) {
+    showToast('GitHub連携タブで設定を先に行ってください');
+    return;
+  }
+
+  const btn = document.getElementById('publish-btn');
+  btn.textContent = '⏳ 公開中...';
+  btn.disabled = true;
+
+  try {
+    // 保存前に全フィールドの値をconfigに反映
+    syncAllFieldsToConfig();
+    localStorage.setItem('site_config', JSON.stringify(config));
+
+    // config.jsの内容を生成
+    const content = `/**\n * サイト設定ファイル\n * 管理画面から自動生成\n * 更新日時: ${new Date().toLocaleString('ja-JP')}\n */\nconst SITE_CONFIG = ${JSON.stringify(config, null, 2)};\n`;
+    const encoded = btoa(unescape(encodeURIComponent(content)));
+
+    // 既存ファイルのSHAを取得（更新にはSHAが必要）
+    const getRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/config.js`, {
+      headers: { 'Authorization': `token ${s.token}` }
+    });
+    let sha = '';
+    if (getRes.ok) {
+      const existing = await getRes.json();
+      sha = existing.sha;
+    }
+
+    // config.jsをGitHubにプッシュ
+    const body = {
+      message: `config.js を更新 (${new Date().toLocaleString('ja-JP')})`,
+      content: encoded,
+      branch: 'main'
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/config.js`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${s.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (putRes.ok) {
+      showToast('✅ サイトに公開しました！1〜2分でNetlifyに反映されます');
+      // 全タブのunsavedバッジをクリア
+      ['basic', 'design', 'content', 'seo'].forEach(t => clearUnsaved(t));
+    } else {
+      const err = await putRes.json();
+      showToast('❌ 公開失敗: ' + (err.message || putRes.status));
+    }
+  } catch (e) {
+    showToast('❌ エラー: ' + e.message);
+  } finally {
+    btn.textContent = '🚀 サイトに公開';
+    btn.disabled = false;
+  }
+}
+
+function showStatus(msg, color) {
+  const el = document.getElementById('github-status');
+  if (el) { el.textContent = msg; el.style.color = color; }
+}
+
+// ページ読み込み時にGitHub設定を復元
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => loadGitHubSettings(), 100);
+});
